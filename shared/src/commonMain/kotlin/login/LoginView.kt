@@ -1,7 +1,5 @@
 package login
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,104 +21,108 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 
+class LoginView : Screen {
+    @Composable
+    override fun Content() {
+        MaterialTheme {
+            val navigator = LocalNavigator.currentOrThrow
+            val viewModel = LoginViewModel()
+            var inputUsername by remember { mutableStateOf(viewModel.username) }
+            var inputPassword by remember { mutableStateOf(viewModel.password) }
+            var usernameError by remember { mutableStateOf(viewModel.usernameError) }
+            var passwordError by remember { mutableStateOf(viewModel.passwordError) }
+            var rememberMe by remember { mutableStateOf(viewModel.rememberMe) }
+            val coroutineScope = rememberCoroutineScope()
 
-
-@Composable
-fun LoginView() {
-    MaterialTheme {
-        val viewModel = LoginViewModel()
-        var inputUsername by remember { mutableStateOf(viewModel.username) }
-        var inputPassword by remember { mutableStateOf(viewModel.password) }
-        var usernameError by remember { mutableStateOf(viewModel.usernameError) }
-        var passwordError by remember { mutableStateOf(viewModel.passwordError) }
-        var rememberMe by remember {mutableStateOf(viewModel.rememberMe) }
-        val coroutineScope = rememberCoroutineScope()
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = "Welcome to Friend Company",
-                style = MaterialTheme.typography.h4,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Column(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = inputUsername,
-                    onValueChange = { inputUsername = it },
-                    label = { Text("Username") },
-                    singleLine = true,
-                    isError = usernameError,
-                    modifier = Modifier
-                        .fillMaxWidth()
-
-                )
-
-                OutlinedTextField(
-                    value = inputPassword,
-                    onValueChange = { inputPassword = it },
-                    label = { Text("Password") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    isError = passwordError,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-
-                Row(
-                    modifier = Modifier.padding(vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = rememberMe,
-                        onCheckedChange = { rememberMe = it },
-                        modifier = Modifier.padding(end = 6.dp)
-                    )
-                    Text("Remember me")
-                }
-
-                Button(
-                    onClick = {
-                        usernameError = inputUsername.isBlank()
-                        passwordError = inputPassword.isBlank()
-                        coroutineScope.launch {
-                            val userAuth = viewModel.login(inputUsername, inputPassword)
-                            if (userAuth) {
-                                println("Login Success")
-//                                navController.navigate(route = AppScreensRoute.Auth.route)
-                            } else {
-                                usernameError = true
-                                passwordError = true
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text("Log In")
-                }
-                if (usernameError || passwordError) {
-                    Text(
-                        text = "Invalid Credentials, try again",
-                        style = MaterialTheme.typography.body1,
-                        modifier = Modifier
-                            .padding(top = 10.dp, bottom = 10.dp)
-                            .align(Alignment.CenterHorizontally),
-                        color = MaterialTheme.colors.error,
-
-                        )
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
                 Text(
-                    text = "Forgot password",
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(top = 8.dp)
+                    text = "Welcome to Friend Company",
+                    style = MaterialTheme.typography.h4,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = inputUsername,
+                        onValueChange = { inputUsername = it },
+                        label = { Text("Username") },
+                        singleLine = true,
+                        isError = usernameError,
+                        modifier = Modifier
+                            .fillMaxWidth()
+
+                    )
+
+                    OutlinedTextField(
+                        value = inputPassword,
+                        onValueChange = { inputPassword = it },
+                        label = { Text("Password") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        isError = passwordError,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+
+                    Row(
+                        modifier = Modifier.padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Switch(
+                            checked = rememberMe,
+                            onCheckedChange = { rememberMe = it },
+                            modifier = Modifier.padding(end = 6.dp)
+                        )
+                        Text("Remember me")
+                    }
+
+                    Button(
+                        onClick = {
+                            usernameError = inputUsername.isBlank()
+                            passwordError = inputPassword.isBlank()
+                            coroutineScope.launch {
+                                val userAuth = viewModel.login(inputUsername, inputPassword)
+                                if (userAuth) {
+                                    println("Login Success")
+                                    navigator.push(SuccessLoginView())
+                                } else {
+                                    usernameError = true
+                                    passwordError = true
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text("Log In")
+                    }
+                    if (usernameError || passwordError) {
+                        Text(
+                            text = "Invalid Credentials, try again",
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier
+                                .padding(top = 10.dp, bottom = 10.dp)
+                                .align(Alignment.CenterHorizontally),
+                            color = MaterialTheme.colors.error,
+
+                            )
+                    }
+                    Text(
+                        text = "Forgot password",
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
         }
     }
