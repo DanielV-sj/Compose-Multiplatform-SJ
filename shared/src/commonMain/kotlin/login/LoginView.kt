@@ -1,7 +1,5 @@
 package login
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -26,18 +23,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 
-
 @Composable
 fun LoginView() {
     MaterialTheme {
         val viewModel = LoginViewModel()
-        var inputUsername by remember { mutableStateOf(viewModel.username) }
-        var inputPassword by remember { mutableStateOf(viewModel.password) }
-        var usernameError by remember { mutableStateOf(viewModel.usernameError) }
-        var passwordError by remember { mutableStateOf(viewModel.passwordError) }
-        var rememberMe by remember {mutableStateOf(viewModel.rememberMe) }
+        val userAuthState by remember { mutableStateOf(viewModel.userAuthState) }
         val coroutineScope = rememberCoroutineScope()
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -51,23 +42,23 @@ fun LoginView() {
             )
             Column(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = inputUsername,
-                    onValueChange = { inputUsername = it },
+                    value = userAuthState.username,
+                    onValueChange = { userAuthState.username = it },
                     label = { Text("Username") },
                     singleLine = true,
-                    isError = usernameError,
+                    isError = userAuthState.usernameError,
                     modifier = Modifier
                         .fillMaxWidth()
 
                 )
 
                 OutlinedTextField(
-                    value = inputPassword,
-                    onValueChange = { inputPassword = it },
+                    value = userAuthState.password,
+                    onValueChange = { userAuthState.password = it },
                     label = { Text("Password") },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
-                    isError = passwordError,
+                    isError = userAuthState.passwordError,
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -77,8 +68,8 @@ fun LoginView() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Switch(
-                        checked = rememberMe,
-                        onCheckedChange = { rememberMe = it },
+                        checked = userAuthState.rememberMe,
+                        onCheckedChange = { userAuthState.rememberMe = it },
                         modifier = Modifier.padding(end = 6.dp)
                     )
                     Text("Remember me")
@@ -86,16 +77,15 @@ fun LoginView() {
 
                 Button(
                     onClick = {
-                        usernameError = inputUsername.isBlank()
-                        passwordError = inputPassword.isBlank()
+                        userAuthState.usernameError = userAuthState.username.isBlank()
+                        userAuthState.passwordError = userAuthState.password.isBlank()
                         coroutineScope.launch {
-                            val userAuth = viewModel.login(inputUsername, inputPassword)
+                            val userAuth = viewModel.login( userAuthState.username, userAuthState.password)
                             if (userAuth) {
                                 println("Login Success")
-//                                navController.navigate(route = AppScreensRoute.Auth.route)
                             } else {
-                                usernameError = true
-                                passwordError = true
+                                userAuthState.usernameError = true
+                                userAuthState.passwordError = true
                             }
                         }
                     },
@@ -105,7 +95,7 @@ fun LoginView() {
                 ) {
                     Text("Log In")
                 }
-                if (usernameError || passwordError) {
+                if ( userAuthState.usernameError ||  userAuthState.passwordError) {
                     Text(
                         text = "Invalid Credentials, try again",
                         style = MaterialTheme.typography.body1,
