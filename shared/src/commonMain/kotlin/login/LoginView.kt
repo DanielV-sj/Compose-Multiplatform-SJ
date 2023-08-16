@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -32,13 +31,8 @@ class LoginView : Screen {
         MaterialTheme {
             val navigator = LocalNavigator.currentOrThrow
             val viewModel = LoginViewModel()
-            var inputUsername by remember { mutableStateOf(viewModel.username) }
-            var inputPassword by remember { mutableStateOf(viewModel.password) }
-            var usernameError by remember { mutableStateOf(viewModel.usernameError) }
-            var passwordError by remember { mutableStateOf(viewModel.passwordError) }
-            var rememberMe by remember { mutableStateOf(viewModel.rememberMe) }
+            val userAuthState by remember { mutableStateOf(viewModel.userAuthState) }
             val coroutineScope = rememberCoroutineScope()
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -62,58 +56,57 @@ class LoginView : Screen {
 
                     )
 
-                    OutlinedTextField(
-                        value = inputPassword,
-                        onValueChange = { inputPassword = it },
-                        label = { Text("Password") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        isError = passwordError,
-                        modifier = Modifier
-                            .fillMaxWidth()
+                OutlinedTextField(
+                    value = userAuthState.password,
+                    onValueChange = { userAuthState.password = it },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    isError = userAuthState.passwordError,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Switch(
+                        checked = userAuthState.rememberMe,
+                        onCheckedChange = { userAuthState.rememberMe = it },
+                        modifier = Modifier.padding(end = 6.dp)
                     )
+                    Text("Remember me")
+                }
 
-                    Row(
-                        modifier = Modifier.padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Switch(
-                            checked = rememberMe,
-                            onCheckedChange = { rememberMe = it },
-                            modifier = Modifier.padding(end = 6.dp)
-                        )
-                        Text("Remember me")
-                    }
-
-                    Button(
-                        onClick = {
-                            usernameError = inputUsername.isBlank()
-                            passwordError = inputPassword.isBlank()
-                            coroutineScope.launch {
-                                val userAuth = viewModel.login(inputUsername, inputPassword)
-                                if (userAuth) {
-                                    println("Login Success")
-                                    navigator.push(SuccessLoginView())
-                                } else {
-                                    usernameError = true
-                                    passwordError = true
-                                }
+                Button(
+                    onClick = {
+                        userAuthState.usernameError = userAuthState.username.isBlank()
+                        userAuthState.passwordError = userAuthState.password.isBlank()
+                        coroutineScope.launch {
+                            val userAuth = viewModel.login( userAuthState.username, userAuthState.password)
+                            if (userAuth) {
+                                println("Login Success")
+                            } else {
+                                userAuthState.usernameError = true
+                                userAuthState.passwordError = true
                             }
-                        },
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text("Log In")
+                }
+                if ( userAuthState.usernameError ||  userAuthState.passwordError) {
+                    Text(
+                        text = "Invalid Credentials, try again",
+                        style = MaterialTheme.typography.body1,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text("Log In")
-                    }
-                    if (usernameError || passwordError) {
-                        Text(
-                            text = "Invalid Credentials, try again",
-                            style = MaterialTheme.typography.body1,
-                            modifier = Modifier
-                                .padding(top = 10.dp, bottom = 10.dp)
-                                .align(Alignment.CenterHorizontally),
-                            color = MaterialTheme.colors.error,
+                            .padding(top = 10.dp, bottom = 10.dp)
+                            .align(Alignment.CenterHorizontally),
+                        color = MaterialTheme.colors.error,
 
                             )
                     }
