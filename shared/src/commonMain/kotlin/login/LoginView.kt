@@ -46,11 +46,11 @@ class LoginView : Screen {
                 )
                 Column(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = inputUsername,
-                        onValueChange = { inputUsername = it },
+                        value = userAuthState.username,
+                        onValueChange = { userAuthState.username = it },
                         label = { Text("Username") },
                         singleLine = true,
-                        isError = usernameError,
+                        isError = userAuthState.usernameError,
                         modifier = Modifier
                             .fillMaxWidth()
 
@@ -86,7 +86,7 @@ class LoginView : Screen {
                         coroutineScope.launch {
                             val userAuth = viewModel.login( userAuthState.username, userAuthState.password)
                             if (userAuth) {
-                                println("Login Success")
+                                navigator.push(SuccessLoginView())
                             } else {
                                 userAuthState.usernameError = true
                                 userAuthState.passwordError = true
