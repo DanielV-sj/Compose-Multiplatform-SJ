@@ -9,7 +9,14 @@ kotlin {
     sourceSets {
         val androidMain by getting {
             dependencies {
+                val decomposeRouter = "0.3.0"
+                val decompose = "2.1.0-compose-experimental-alpha-06"
+                val essenty = "1.2.0-alpha-05"
                 implementation(project(":shared"))
+                // You will need to also bring in decompose and essenty
+                implementation("com.arkivanov.decompose:decompose:${decompose}")
+                implementation("com.arkivanov.decompose:extensions-compose-jetbrains:${decompose}")
+                implementation("com.arkivanov.essenty:parcelable:${essenty}")
             }
         }
     }
