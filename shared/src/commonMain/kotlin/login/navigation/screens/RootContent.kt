@@ -9,7 +9,7 @@ import login.navigation.components.RootComponent
 
 
 @Composable
-fun RootContent(rootComponent: RootComponent, modifier: Modifier = Modifier) {
+fun RootContent(rootComponent: RootComponent, modifier: Modifier) {
     Children(stack= rootComponent.stack, animation = stackAnimation(fade())) {
         when (val child = it.instance) {
             is RootComponent.Child.LoginChild -> LoginView(child.component)

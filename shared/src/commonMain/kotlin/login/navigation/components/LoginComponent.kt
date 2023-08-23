@@ -43,8 +43,3 @@ class DefaultLoginComponent(
     }
 }
 
-//expect open class LoginViewModel() {
-//    val userAuthState: UserAuthState
-//    fun login(username: String, password: String): Boolean
-//}
-
